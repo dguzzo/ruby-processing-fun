@@ -1,9 +1,16 @@
 # Based on circle_collision in the ruby-processing samples, which is based on http://processing.org/learning/topics/circlecollision.html
 # by Joe Holt
 
+require 'pp'
+
 class DomSketch < Processing::App
-  
-  @@BACKGROUND = 0
+
+  def initialize(args) # necessary if we want Background to be an instance var (@) and not a class var (@@). more verbose this way, but done for learning purposes
+    @BACKGROUND = 0
+    @BACKGROUND_DARK = 0
+    @BACKGROUND_LIGHT = 255
+    super(args)
+  end
   
   # This inner class demonstrates the use of Ruby-Processing's emulation of
   # Java inner classes. The Balls are able to call Processing::App methods.
@@ -11,8 +18,10 @@ class DomSketch < Processing::App
     attr_accessor :x, :y, :r, :m, :vec, :ball_fill, :num_collisions, :rainbow_mode
     
     @@MIN_FILL = 90
-    @@INCREMENT_FILL_VAL = 10
-    @@RAINBOW_THRESHOLD = 5
+    @@INCREMENT_FILL_VAL = 5
+    @@RAINBOW_THRESHOLD = 5 #determines how many collisions are needed for a ball to enter rainbow mode
+    @@COLORS_USED = []
+    @@GRAYS_USED = []
     
     def initialize(r = 0.0, vec = nil, x = 0.0, y = 0.0)
       @x, @y, @r = x, y, r
@@ -21,6 +30,14 @@ class DomSketch < Processing::App
       @ball_fill = rand(255)
       @num_collisions = 0
       @rainbow_mode = false
+    end
+    
+    def self.colors_used
+      @@COLORS_USED.length
+    end
+    
+    def self.grays_used
+      @@GRAYS_USED.length
     end
     
     def move
@@ -40,25 +57,45 @@ class DomSketch < Processing::App
     end
     
     def collision_side_effects
-      @num_collisions += 1
+      # @num_collisions += 1
+      @num_collisions = @num_collisions.next # just having fun with methods for learning purposes
       if @num_collisions > @@RAINBOW_THRESHOLD
         @rainbow_mode = true
       end
       increment_fill
     end
     
+    # increment the fill value of the ball
     def increment_fill
       begin
         # increment the fill value. reset value to a certain minimum if it goes over the max gray value.
-        if self.rainbow_mode
-          #print 'rainbow\n'
-          self.ball_fill = [rand(255),rand(255),rand(255)]
+        if @rainbow_mode
+          new_color = [rand(255),rand(255),rand(255)]
+          @ball_fill = new_color
+          @@COLORS_USED << new_color unless @@COLORS_USED.include?(new_color)
         else
-          self.ball_fill = ((self.ball_fill += @@INCREMENT_FILL_VAL) > 255 ) ? @@MIN_FILL : self.ball_fill += @@INCREMENT_FILL_VAL
+          @ball_fill = ((@ball_fill += @@INCREMENT_FILL_VAL) > 255 ) ? @@MIN_FILL : @ball_fill += @@INCREMENT_FILL_VAL
+          @@GRAYS_USED << @ball_fill unless @@GRAYS_USED.include?(@ball_fill)
         end
-        
       rescue => e
-        puts "error in increment_fill: #{e}"
+        puts "error in increment_fill: #{e.message}"
+      end
+    end
+
+    # returns true if the ball's fill color is above a certain, arbitrary threshold for brightness value.
+    # basically an excuse to use the .between? method as a learning experience
+    def is_bright_color?
+      brightness_threshold_low = 200
+      begin
+        if @ball_fill.class == Array
+          # puts "#{@ball_fill[0]} #{@ball_fill[1]} #{@ball_fill[2]}"
+          return @ball_fill[0].between?(brightness_threshold_low,255) || @ball_fill[1].between?(brightness_threshold_low,255) || @ball_fill[2].between?(brightness_threshold_low,255)
+        else
+          return @ball_fill.between?(brightness_threshold_low,255)
+        end
+      rescue => e
+        puts "error in is_bright_color? #{e.message}"
+        false
       end
     end
     
@@ -72,8 +109,9 @@ class DomSketch < Processing::App
     rect_mode RADIUS
 
     @balls = []
-    7.times { @balls << Ball.new(10, PVector.new(2.15, -1.35), *empty_space(15)) }
+    15.times { @balls << Ball.new(10, PVector.new(2.15, -1.35), *empty_space(15)) }
     3.times { @balls << Ball.new(40, PVector.new(-1.65, 0.42), *empty_space(45)) }
+    1.times { @balls << Ball.new(55, PVector.new(3.15, -1.35), *empty_space(60)) }
 
     @frame_time = nil
     @frame_count = 0
@@ -86,13 +124,22 @@ class DomSketch < Processing::App
     @frame_time = t
     @frame_count += 1
 
+    if @frame_count % 30 == 0
+      #puts "#{Ball.colors_used} unique colors have been used"
+      # puts "#{Ball.grays_used} unique grays have been used"
+      pp how_many_brights
+      pp percent_brights
+    end
+
     # erase previous screen
     if @frame_count == 1
-      background @@BACKGROUND
+      background @BACKGROUND
     else
-      fill @@BACKGROUND
+      fill @BACKGROUND
       @balls.each { |ball| ball.erase }
     end
+
+    custom_effects
 
     # move the balls 
     @balls.each do |ball|
@@ -111,6 +158,27 @@ class DomSketch < Processing::App
     check_object_collisions
   end
 
+
+  def custom_effects
+    # change background color based on how many bright colored balls there are
+    @BACKGROUND = (percent_brights > 50) ? @BACKGROUND_LIGHT : @BACKGROUND_DARK
+  end
+
+  def how_many_brights
+    brights = @balls.select do |ball|
+      ball.is_bright_color?
+    end
+    brights.length
+  end
+
+  def percent_brights
+    brights = how_many_brights
+    (brights.to_f/@balls.length.to_f) * 100
+  end
+
+  def mouseClicked
+    puts "CLICK x:#{mouseX} y:#{mouseY}"
+  end
 
   def empty_space(r)
     x = y = nil
