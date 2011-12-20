@@ -180,6 +180,20 @@ class DomSketch < Processing::App
     puts "CLICK x:#{mouseX} y:#{mouseY}"
   end
 
+  def keyPressed
+    if key == CODED
+      if keyCode == UP
+        fillVal = 255
+        puts "UP!"
+      elsif keyCode == DOWN
+        fillVal = 0
+        puts "DOWN!"
+      end
+    else
+      fillVal = 126
+    end
+  end
+
   def empty_space(r)
     x = y = nil
     while !x || !empty_space?(x, y, r) do
