@@ -4,104 +4,17 @@
 require 'pp'
 
 class DomSketch < Processing::App
+  attr_accessor :canvas_background
+  require 'lib/ball'
+
+  BACKGROUND_DARK = 0
+  BACKGROUND_LIGHT = 255
 
   def initialize(args) # necessary if we want Background to be an instance var (@) and not a class var (@@). more verbose this way, but done for learning purposes
-    @BACKGROUND = 0
-    @BACKGROUND_DARK = 0
-    @BACKGROUND_LIGHT = 255
+    @canvas_background = 0
     super(args)
   end
   
-  # This inner class demonstrates the use of Ruby-Processing's emulation of
-  # Java inner classes. The Balls are able to call Processing::App methods.
-  class Ball
-    attr_accessor :x, :y, :r, :m, :vec, :ball_fill, :num_collisions, :rainbow_mode
-    
-    @@MIN_FILL = 90
-    @@INCREMENT_FILL_VAL = 5
-    @@RAINBOW_THRESHOLD = 5 #determines how many collisions are needed for a ball to enter rainbow mode
-    @@COLORS_USED = []
-    @@GRAYS_USED = []
-    
-    def initialize(r = 0.0, vec = nil, x = 0.0, y = 0.0)
-      @x, @y, @r = x, y, r
-      @m = r * 0.1
-      @vec = vec
-      @ball_fill = rand(255)
-      @num_collisions = 0
-      @rainbow_mode = false
-    end
-    
-    def self.colors_used
-      @@COLORS_USED.length
-    end
-    
-    def self.grays_used
-      @@GRAYS_USED.length
-    end
-    
-    def move
-      @x += @vec.x
-      @y += @vec.y
-    end
-  
-    def draw
-      r = @r * 2
-      ellipse @x, @y, r, r
-      @px, @py = @x, @y
-    end
-  
-    def erase
-      r = @r * 2
-      rect @px, @py, r, r
-    end
-    
-    def collision_side_effects
-      # @num_collisions += 1
-      @num_collisions = @num_collisions.next # just having fun with methods for learning purposes
-      if @num_collisions > @@RAINBOW_THRESHOLD
-        @rainbow_mode = true
-      end
-      increment_fill
-    end
-    
-    # increment the fill value of the ball
-    def increment_fill
-      begin
-        # increment the fill value. reset value to a certain minimum if it goes over the max gray value.
-        if @rainbow_mode
-          new_color = [rand(255),rand(255),rand(255)]
-          @ball_fill = new_color
-          @@COLORS_USED << new_color unless @@COLORS_USED.include?(new_color)
-        else
-          @ball_fill = ((@ball_fill += @@INCREMENT_FILL_VAL) > 255 ) ? @@MIN_FILL : @ball_fill += @@INCREMENT_FILL_VAL
-          @@GRAYS_USED << @ball_fill unless @@GRAYS_USED.include?(@ball_fill)
-        end
-      rescue => e
-        puts "error in increment_fill: #{e.message}"
-      end
-    end
-
-    # returns true if the ball's fill color is above a certain, arbitrary threshold for brightness value.
-    # basically an excuse to use the .between? method as a learning experience
-    def is_bright_color?
-      brightness_threshold_low = 200
-      begin
-        if @ball_fill.class == Array
-          # puts "#{@ball_fill[0]} #{@ball_fill[1]} #{@ball_fill[2]}"
-          return @ball_fill[0].between?(brightness_threshold_low,255) || @ball_fill[1].between?(brightness_threshold_low,255) || @ball_fill[2].between?(brightness_threshold_low,255)
-        else
-          return @ball_fill.between?(brightness_threshold_low,255)
-        end
-      rescue => e
-        puts "error in is_bright_color? #{e.message}"
-        false
-      end
-    end
-    
-  end
-  
-
   def setup
     smooth
     no_stroke
@@ -127,53 +40,55 @@ class DomSketch < Processing::App
     if @frame_count % 30 == 0
       #puts "#{Ball.colors_used} unique colors have been used"
       # puts "#{Ball.grays_used} unique grays have been used"
-      pp how_many_brights
-      pp percent_brights
+      
+      # pp bright_balls
+      # pp percent_brights
     end
 
     # erase previous screen
     if @frame_count == 1
-      background @BACKGROUND
+      background @canvas_background
     else
-      fill @BACKGROUND
+      fill @canvas_background
       @balls.each { |ball| ball.erase }
     end
 
     custom_effects
+    move_balls
+    check_object_collisions
+  end
 
+  def move_balls
     # move the balls 
     @balls.each do |ball|
-      
       # fill the ball with its saved value
-      if(ball.ball_fill.class == Array)
+      if ball.ball_fill.is_a?(Array)
         fill *(ball.ball_fill) # need splat operator if ball_fill is a color and not grayscale
       else
         fill ball.ball_fill
       end
       
-      ball.move
-      ball.draw
+      ball.move.draw
       check_boundary_collision ball
     end
-    check_object_collisions
   end
-
 
   def custom_effects
     # change background color based on how many bright colored balls there are
-    @BACKGROUND = (percent_brights > 50) ? @BACKGROUND_LIGHT : @BACKGROUND_DARK
+    # @canvas_background = (percent_brights > 50) ? BACKGROUND_LIGHT : BACKGROUND_DARK
   end
 
-  def how_many_brights
-    brights = @balls.select do |ball|
-      ball.is_bright_color?
-    end
+  def brighten_background(increment = 10)
+    @canvas_background = @canvas_background > 255 ? 0 : @canvas_background += increment
+  end
+
+  def bright_balls
+    brights = @balls.select { |ball| ball.is_bright_color? }
     brights.length
   end
 
   def percent_brights
-    brights = how_many_brights
-    (brights.to_f/@balls.length.to_f) * 100
+    (bright_balls.to_f / @balls.length.to_f) * 100
   end
 
   def mouseClicked
@@ -200,7 +115,7 @@ class DomSketch < Processing::App
       x = rand(width)
       y = rand(height)
     end
-    return x, y
+    [x, y]
   end
 
 
@@ -211,7 +126,7 @@ class DomSketch < Processing::App
       mag = sqrt(vx * vx + vy * vy)
       return false if mag < r + ball.r
     end
-    return true
+    true
   end
 
 
@@ -307,16 +222,17 @@ class DomSketch < Processing::App
   end
 
 
-  def check_boundary_collision(ball)
-    if ball.x > width-ball.r
-      ball.x = width-ball.r
+  def check_boundary_collision( ball )
+    if ball.x > width - ball.r
+      ball.x = width - ball.r
       ball.vec.x *= -1
     elsif ball.x < ball.r
       ball.x = ball.r
       ball.vec.x *= -1
     end
-    if ball.y > height-ball.r
-      ball.y = height-ball.r
+    
+    if ball.y > height - ball.r
+      ball.y = height - ball.r
       ball.vec.y *= -1
     elsif ball.y < ball.r
       ball.y = ball.r
@@ -327,4 +243,9 @@ class DomSketch < Processing::App
 end
 
 
-DomSketch.new(:width => 400, :height => 400, :title => "DomSketch")
+d = DomSketch.new(:width => 400, :height => 400, :title => "DomSketch")
+
+while true do
+  sleep 0.5
+  d.brighten_background(12)
+end
