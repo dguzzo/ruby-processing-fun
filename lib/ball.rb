@@ -6,6 +6,7 @@ class Ball
   @@RAINBOW_THRESHOLD = 5 #determines how many collisions are needed for a ball to enter rainbow mode
   @@COLORS_USED = []
   @@GRAYS_USED = []
+  BRIGHTNESS_THRESHOLD_LOW = 200
   
   def initialize(r = 0.0, vec = nil, x = 0.0, y = 0.0)
     @x, @y, @r = x, y, r
@@ -70,13 +71,12 @@ class Ball
   # returns true if the ball's fill color is above a certain, arbitrary threshold for brightness value.
   # basically an excuse to use the .between? method as a learning experience
   def is_bright_color?
-    brightness_threshold_low = 200
     begin
-      if @ball_fill.class == Array
+      if @ball_fill.is_a? Array
         # puts "#{@ball_fill[0]} #{@ball_fill[1]} #{@ball_fill[2]}"
-        return @ball_fill[0].between?(brightness_threshold_low,255) || @ball_fill[1].between?(brightness_threshold_low,255) || @ball_fill[2].between?(brightness_threshold_low,255)
+        return @ball_fill[0].between?(BRIGHTNESS_THRESHOLD_LOW,255) || @ball_fill[1].between?(BRIGHTNESS_THRESHOLD_LOW,255) || @ball_fill[2].between?(BRIGHTNESS_THRESHOLD_LOW,255)
       else
-        return @ball_fill.between?(brightness_threshold_low,255)
+        return @ball_fill.between?(BRIGHTNESS_THRESHOLD_LOW,255)
       end
     rescue => e
       puts "error in is_bright_color? #{e.message}"

@@ -2,10 +2,11 @@
 # by Joe Holt
 
 require 'pp'
+require 'lib/helpers'
+require 'lib/ball'
 
 class DomSketch < Processing::App
   attr_accessor :canvas_background
-  require 'lib/ball'
 
   BACKGROUND_DARK = 0
   BACKGROUND_LIGHT = 255
@@ -41,7 +42,7 @@ class DomSketch < Processing::App
       #puts "#{Ball.colors_used} unique colors have been used"
       # puts "#{Ball.grays_used} unique grays have been used"
       
-      # pp bright_balls
+      pp "number of colored balls: #{Helpers.bright_balls(@balls)}"
       # pp percent_brights
     end
 
@@ -82,14 +83,10 @@ class DomSketch < Processing::App
     @canvas_background = @canvas_background > 255 ? 0 : @canvas_background += increment
   end
 
-  def bright_balls
-    brights = @balls.select { |ball| ball.is_bright_color? }
-    brights.length
-  end
-
   def percent_brights
-    (bright_balls.to_f / @balls.length.to_f) * 100
+    (Helpers.bright_balls(@balls).to_f / @balls.length.to_f) * 100
   end
+  private :percent_brights
 
   def mouseClicked
     puts "CLICK x:#{mouseX} y:#{mouseY}"
