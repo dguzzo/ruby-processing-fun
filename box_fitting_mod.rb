@@ -1,4 +1,5 @@
 require 'pp'
+require 'lib/box'
 
 class BoxFittingMod < Processing::App
     @@BACKGROUND = 0
@@ -55,86 +56,10 @@ class BoxFittingMod < Processing::App
 
     def self.make_new_box
         if @@num < @@maxnum
-            pp "@dim: #{@@dim}"
             @@boxes[@@num] = Box.new({:dim => @@dim})
             @@num += 1
         end
     end
-
-    ## OBJECTS ---
-    class Box
-        attr_accessor :x, :y, :d, :my_color, :ok_to_draw, :chaste
-
-        def initialize(options={})
-            dim = options[:dim] || 600
-            @x = rand(dim)
-            @y = rand(dim)
-            @d = 0
-            @my_color = some_color(@y.to_f / dim)
-            @ok_to_draw = false
-            @chaste = true
-        end
-
-        def draw
-            expand
-            if ok_to_draw
-                fill my_color
-                rect(x,y,d,d)
-            end
-        end
-
-        def expand
-            # assume expansion is ok
-            @d += 2
-
-            #look for obstructions around perimeter at width d
-             @obstructions = 0
-             
-             j = (@x - @d/2 - 1).to_i
-             
-             while j < (@x + @d/2).to_i
-                 k = (@y - @d/2 - 1).to_i
-                 @obstructions += check_pixel(j,k)
-                 k = (@y+@d/2).to_i
-                 @obstructions += check_pixel(j,k)
-                 j += 1
-             end
-
-             k = (@y - @d/2 - 1).to_i
-
-             while k < (@y + @d/2).to_i
-                 j = (@x - @d/2 - 1).to_i
-                 @obstructions += check_pixel(j,k)
-                 j = (@x+@d/2).to_i
-                 @obstructions += check_pixel(j,k)
-                 k += 1
-             end
-
-             if @obstructions > 0
-                 initialize
-                 # reset
-                 if @chaste
-                     BoxFittingMod.make_new_box
-                     @chaste = false
-                 end
-             else
-                 @ok_to_draw = true
-             end
-
-        end
-
-        def check_pixel(x, y)
-            c = get(x,y)
-            ( brightness(c) < 254 ) ? 1 : 0
-        end
-
-        def some_color(param)
-            # pick color according to range
-            BoxFittingMod.good_color[(param.to_f * BoxFittingMod.numpal).to_i]
-        end
-
-    end
-
 
     def take_color(fn)
         # PImage b
