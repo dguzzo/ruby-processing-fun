@@ -1,7 +1,6 @@
 require 'pp'
 
 class BoxFittingMod < Processing::App
-
     @@BACKGROUND = 0
     @@BACKGROUND_DARK = 0
     @@BACKGROUND_LIGHT = 255
@@ -22,29 +21,29 @@ class BoxFittingMod < Processing::App
         @@numpal = n
     end
 
-    def self.maxpal
-        @@maxpal
+    def self.max_pal
+        @@max_pal
     end
 
-    def self.goodcolor
-        @@goodcolor
+    def self.good_color
+        @@good_color
     end
 
     def initialize(args)
         @@numpal = 0
-        @@maxpal = 256
-        @@goodcolor = Array.new(@@maxpal)
+        @@max_pal = 256
+        @@good_color = Array.new(@@max_pal)
         super(args)
     end
 
     def setup
         frame_rate 30
         rectMode(CENTER)
-        takecolor("images/test.gif")
+        take_color("images/test.gif")
         background(255)
         
         3.times do 
-            BoxFittingMod.makeNewBox
+            BoxFittingMod.make_new_box
         end
     end
 
@@ -54,7 +53,7 @@ class BoxFittingMod < Processing::App
         end
     end
 
-    def self.makeNewBox
+    def self.make_new_box
         if @@num < @@maxnum
             pp "@dim: #{@@dim}"
             @@boxes[@@num] = Box.new({:dim => @@dim})
@@ -64,25 +63,22 @@ class BoxFittingMod < Processing::App
 
     ## OBJECTS ---
     class Box
-        attr_accessor :x, :y, :d, :myc, :okToDraw, :chaste
+        attr_accessor :x, :y, :d, :my_color, :ok_to_draw, :chaste
 
         def initialize(options={})
-
-            pp "------@numpal: #{BoxFittingMod.numpal}"
-            # pp "------options: #{options[:dim]}"
             dim = options[:dim] || 600
             @x = rand(dim)
             @y = rand(dim)
             @d = 0
-            @myc = somecolor(1.0*@y/dim)
-            @okToDraw = false
+            @my_color = some_color(@y.to_f / dim)
+            @ok_to_draw = false
             @chaste = true
         end
 
         def draw
             expand
-            if okToDraw
-                fill myc
+            if ok_to_draw
+                fill my_color
                 rect(x,y,d,d)
             end
         end
@@ -98,9 +94,9 @@ class BoxFittingMod < Processing::App
              
              while j < (@x + @d/2).to_i
                  k = (@y - @d/2 - 1).to_i
-                 @obstructions += checkPixel(j,k)
+                 @obstructions += check_pixel(j,k)
                  k = (@y+@d/2).to_i
-                 @obstructions += checkPixel(j,k)
+                 @obstructions += check_pixel(j,k)
                  j += 1
              end
 
@@ -108,9 +104,9 @@ class BoxFittingMod < Processing::App
 
              while k < (@y + @d/2).to_i
                  j = (@x - @d/2 - 1).to_i
-                 @obstructions += checkPixel(j,k)
+                 @obstructions += check_pixel(j,k)
                  j = (@x+@d/2).to_i
-                 @obstructions += checkPixel(j,k)
+                 @obstructions += check_pixel(j,k)
                  k += 1
              end
 
@@ -118,33 +114,29 @@ class BoxFittingMod < Processing::App
                  initialize
                  # reset
                  if @chaste
-                     BoxFittingMod.makeNewBox
+                     BoxFittingMod.make_new_box
                      @chaste = false
                  end
              else
-                 @okToDraw = true
+                 @ok_to_draw = true
              end
 
         end
 
-        def checkPixel(x, y)
+        def check_pixel(x, y)
             c = get(x,y)
             ( brightness(c) < 254 ) ? 1 : 0
         end
 
-        def somecolor(p)
-            pp "somecolor, p= #{p}"
+        def some_color(param)
             # pick color according to range
-            BoxFittingMod.goodcolor[(p.to_f*BoxFittingMod.numpal).to_i];
+            BoxFittingMod.good_color[(param.to_f * BoxFittingMod.numpal).to_i]
         end
 
     end
 
 
-    def takecolor(fn)
-
-        pp '------ takecolor()'
-
+    def take_color(fn)
         # PImage b
         b = loadImage(fn)
         image(b,0,0)
@@ -154,9 +146,8 @@ class BoxFittingMod < Processing::App
                 c = get(x,y)
                 exists = false
 
-                p BoxFittingMod
                 BoxFittingMod.numpal.times do |n|
-                    if c == BoxFittingMod.goodcolor[n]
+                    if c == BoxFittingMod.good_color[n]
                         exists = true
                         break
                     end
@@ -164,8 +155,8 @@ class BoxFittingMod < Processing::App
 
                 unless exists
                     # add color to pal
-                    if BoxFittingMod.numpal < BoxFittingMod.maxpal
-                        BoxFittingMod.goodcolor[BoxFittingMod.numpal] = c
+                    if BoxFittingMod.numpal < BoxFittingMod.max_pal
+                        BoxFittingMod.good_color[BoxFittingMod.numpal] = c
                         BoxFittingMod.numpal += 1
                     else
                         break
@@ -180,4 +171,3 @@ class BoxFittingMod < Processing::App
 end
 
 BoxFittingMod.new(:width => 400, :height => 400, :title => "BoxFittingMod")
-puts BoxFittingMod.numpal
