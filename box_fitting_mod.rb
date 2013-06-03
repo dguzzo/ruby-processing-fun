@@ -1,6 +1,8 @@
 require 'pp'
 require 'lib/box'
 
+$CANVAS_WIDTH = 1200
+
 class BoxFittingMod < Processing::App
     @@BACKGROUND = 0
     @@BACKGROUND_DARK = 0
@@ -95,4 +97,4 @@ class BoxFittingMod < Processing::App
 
 end
 
-BoxFittingMod.new(:width => 400, :height => 400, :title => "BoxFittingMod")
+BoxFittingMod.new(:width => $CANVAS_WIDTH, :height => 400, :title => "BoxFittingMod")

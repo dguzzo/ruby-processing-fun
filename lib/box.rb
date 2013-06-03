@@ -3,11 +3,12 @@ class Box
     attr_accessor :x, :y, :d, :my_color, :ok_to_draw, :chaste
 
     def initialize(options={})
-        dim = options[:dim] || 600
+        dim = options[:dim] || $CANVAS_WIDTH
         @x = rand(dim)
         @y = rand(dim)
         @d = 0
-        @my_color = some_color(@y.to_f / dim)
+        # @my_color = some_color(@y.to_f / dim)
+        @my_color = rand(256)
         @ok_to_draw = false
         @chaste = true
     end
@@ -16,9 +17,20 @@ class Box
         expand
         if ok_to_draw
             $app.fill my_color
-            $app.rect(x,y,d,d)
+            rounded_if_possible
         end
     end
+
+    def rounded_if_possible
+        threshold = 7
+        if @d > threshold
+            @corner_radius = rand(threshold)
+            $app.rect(@x, @y, @d, @d, @corner_radius, @corner_radius, @corner_radius, @corner_radius)
+        else
+            $app.rect(@x, @y, @d, @d)
+        end
+    end
+    private :rounded_if_possible
 
     def expand
         # assume expansion is ok
