@@ -1,7 +1,13 @@
 require 'pp'
+require 'yaml'
+require 'vendor/deep_symbolize'
+require 'vendor/settings'
 require 'lib/box'
 
+Settings.load!("config/settings.yml")
+
 $CANVAS_WIDTH = 1200
+$CANVAS_HEIGHT = 400
 
 class BoxFittingMod < Processing::App
     @@num = 0
@@ -9,16 +15,16 @@ class BoxFittingMod < Processing::App
     @@dim = 600
     @@boxes = []
 
-    # unfortunately necessary to do this manuallyf or class variables accessible outside the class itself. if i could easily load active_support via
+    # unfortunately necessary to do this manually or class variables accessible outside the class itself. if i could easily load active_support via
     # jruby, then i could use :cattr_accessor and this would define the getters/setters automatically, but I keep running into issues with gem
     # dependencies. a stack overflow answer said that doing it manually was a workable alternative.
     
-    def self.numpal
-        @@numpal
+    def self.num_pal
+        @@num_pal
     end
 
-    def self.numpal=(n)
-        @@numpal = n
+    def self.num_pal=(n)
+        @@num_pal = n
     end
 
     def self.max_pal
@@ -30,7 +36,7 @@ class BoxFittingMod < Processing::App
     end
 
     def initialize(args)
-        @@numpal = 0
+        @@num_pal = 0
         @@max_pal = 256
         @@good_color = Array.new(@@max_pal)
         super(args)
@@ -55,28 +61,29 @@ class BoxFittingMod < Processing::App
             @@num += 1
         end
     end
+    
+    private
+    def take_color(filename)
+        loaded_image = loadImage(filename)
+        image(loaded_image, 0, 0)
 
-    def take_color(fn)
-        b = loadImage(fn)
-        image(b,0,0)
-
-        b.width.times do |itemW|
-            b.height.times do |itemH|
-                c = get(x,y)
+        loaded_image.width.times do |itemW|
+            loaded_image.height.times do |itemH|
+                pixel_value = get(x,y)
                 exists = false
 
-                BoxFittingMod.numpal.times do |n|
-                    if c == BoxFittingMod.good_color[n]
+                BoxFittingMod.num_pal.times do |n|
+                    if pixel_value == BoxFittingMod.good_color[n]
                         exists = true
                         break
                     end
                 end
 
                 unless exists
-                    break if BoxFittingMod.numpal >= BoxFittingMod.max_pal
+                    break if BoxFittingMod.num_pal >= BoxFittingMod.max_pal
                     # add color to pal
-                    BoxFittingMod.good_color[BoxFittingMod.numpal] = c
-                    BoxFittingMod.numpal += 1
+                    BoxFittingMod.good_color[BoxFittingMod.num_pal] = pixel_value
+                    BoxFittingMod.num_pal += 1
                 end
             end
         end
@@ -84,4 +91,4 @@ class BoxFittingMod < Processing::App
 
 end
 
-BoxFittingMod.new(:width => $CANVAS_WIDTH, :height => 400, :title => "BoxFittingMod")
+BoxFittingMod.new(:width => $CANVAS_WIDTH, :height => $CANVAS_HEIGHT, :title => "BoxFittingMod")

@@ -8,7 +8,7 @@ class Box
         @y = rand(dim)
         @d = 0
         # @my_color = some_color(@y.to_f / dim)
-        @my_color = rand(256)
+        @my_color = random_color
         @ok_to_draw = false
         @chaste = true
     end
@@ -16,7 +16,12 @@ class Box
     def draw
         expand
         if ok_to_draw
-            $app.fill my_color
+            if @my_color.is_a? Array
+                $app.fill *@my_color
+            else
+                $app.fill @my_color
+            end
+            
             rounded_if_possible
         end
     end
@@ -80,6 +85,23 @@ class Box
     def some_color(param)
         # pick color according to range
         BoxFittingMod.good_color[(param.to_f * BoxFittingMod.numpal).to_i]
+    end
+    
+    private
+    
+    def random_color
+        include_grayscale = false
+        
+        if include_grayscale
+            (rand(100) < 25) ? rand(256) : color_from_settings
+        else
+            color_from_settings
+        end
+    end
+    
+    def color_from_settings
+        # Settings.colors.sample.split(',')
+        Settings.colors[rand(Settings.colors.length)].split(',').map! {|c| c.to_i}
     end
 
 end
