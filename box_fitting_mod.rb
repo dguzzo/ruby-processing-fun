@@ -4,9 +4,6 @@ require 'lib/box'
 $CANVAS_WIDTH = 1200
 
 class BoxFittingMod < Processing::App
-    @@BACKGROUND = 0
-    @@BACKGROUND_DARK = 0
-    @@BACKGROUND_LIGHT = 255
     @@num = 0
     @@maxnum = 1000
     @@dim = 600
@@ -42,18 +39,14 @@ class BoxFittingMod < Processing::App
     def setup
         frame_rate 30
         rectMode(CENTER)
-        take_color("images/test.gif")
+        # take_color("images/test.gif")
         background(255)
         
-        3.times do 
-            BoxFittingMod.make_new_box
-        end
+        3.times { BoxFittingMod.make_new_box }
     end
 
     def draw
-        @@boxes.each do |box|
-            box.draw
-        end
+        @@boxes.each { |box| box.draw }
     end
 
     def self.make_new_box
@@ -64,7 +57,6 @@ class BoxFittingMod < Processing::App
     end
 
     def take_color(fn)
-        # PImage b
         b = loadImage(fn)
         image(b,0,0)
 
@@ -81,18 +73,13 @@ class BoxFittingMod < Processing::App
                 end
 
                 unless exists
+                    break if BoxFittingMod.numpal >= BoxFittingMod.max_pal
                     # add color to pal
-                    if BoxFittingMod.numpal < BoxFittingMod.max_pal
-                        BoxFittingMod.good_color[BoxFittingMod.numpal] = c
-                        BoxFittingMod.numpal += 1
-                    else
-                        break
-                    end
+                    BoxFittingMod.good_color[BoxFittingMod.numpal] = c
+                    BoxFittingMod.numpal += 1
                 end
-
             end
         end
-
     end
 
 end
