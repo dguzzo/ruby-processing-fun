@@ -10,9 +10,8 @@ $CANVAS_WIDTH = 1200
 $CANVAS_HEIGHT = 400
 
 class BoxFittingMod < Processing::App
-    @@num = 0
-    @@maxnum = 1000
-    @@dim = 600
+    @@num_boxes = 0
+    @@max_boxes = 1000
     @@boxes = []
 
     # unfortunately necessary to do this manually or class variables accessible outside the class itself. if i could easily load active_support via
@@ -56,9 +55,9 @@ class BoxFittingMod < Processing::App
     end
 
     def self.make_new_box
-        if @@num < @@maxnum
-            @@boxes[@@num] = Box.new({:dim => @@dim})
-            @@num += 1
+        if @@num_boxes < @@max_boxes
+            @@boxes[@@num_boxes] = Box.new({:dim => 600})
+            @@num_boxes += 1
         end
     end
     

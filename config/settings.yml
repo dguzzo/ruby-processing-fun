@@ -1,5 +1,8 @@
 # todo note: can't use reserved words as keys; seems limiting, as i want 'constants' as a top-level container.
 # perhaps could request of the folks that wrote what's in settings.rb to make this possible...
 ---
-preset_name: "test"
-colors: ['235,249,194', '191,182,198', '173,132,153', '191,255,234', '123,180,167']
+# preset_name: "Chicken and/or egg ?"
+# colors: ['235,249,194', '191,182,198', '173,132,153', '191,255,234', '123,180,167']
+
+preset_name: "A Neon or Two"
+colors: ['1,1,40', '51,6,165', '85,0,167', '171,94,210', '6,226,225']

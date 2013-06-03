@@ -30,7 +30,7 @@ class Box
         threshold = 7
         if @d > threshold
             @corner_radius = rand(threshold)
-            $app.rect(@x, @y, @d, @d, @corner_radius, @corner_radius, @corner_radius, @corner_radius)
+            $app.rect(@x, @y, @d, @d, @corner_radius, @corner_radius, @corner_radius, @corner_radius) # need processing 2.0 to support simpler 5th argument all-corners value
         else
             $app.rect(@x, @y, @d, @d)
         end
