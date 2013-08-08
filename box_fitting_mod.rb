@@ -3,6 +3,7 @@ require 'yaml'
 require 'vendor/deep_symbolize'
 require 'vendor/settings'
 require 'lib/box'
+# require 'pry' # recall that this doesn't work due to jRuby and gem load paths or something
 
 Settings.load!("config/settings.yml")
 
@@ -26,8 +27,8 @@ class BoxFittingMod < Processing::App
         @@num_pal = n
     end
 
-    def self.max_pal
-        @@max_pal
+    def self.max_palette
+        @@max_palette
     end
 
     def self.good_color
@@ -36,15 +37,19 @@ class BoxFittingMod < Processing::App
 
     def initialize(args)
         @@num_pal = 0
-        @@max_pal = 256
-        @@good_color = Array.new(@@max_pal)
+        @@max_palette = 256
+        @@good_color = Array.new(@@max_palette)
         super(args)
     end
 
     def setup
         frame_rate 30
         rectMode(CENTER)
-        # take_color("images/test.gif")
+        
+        p color_from_image("images/warm_red.png")
+        # p color_from_image("images/green.png")
+        # take_color("images/warm_red.png")
+        
         background(255)
         
         3.times { BoxFittingMod.make_new_box }
@@ -62,6 +67,14 @@ class BoxFittingMod < Processing::App
     end
     
     private
+    
+    def color_from_image(filename)
+        loaded_image = loadImage(filename)
+        image(loaded_image, 0, 0)
+        pixel_value = get(0, 0)
+        pixel_value
+    end
+    
     def take_color(filename)
         loaded_image = loadImage(filename)
         image(loaded_image, 0, 0)
@@ -79,7 +92,7 @@ class BoxFittingMod < Processing::App
                 end
 
                 unless exists
-                    break if BoxFittingMod.num_pal >= BoxFittingMod.max_pal
+                    break if BoxFittingMod.num_pal >= BoxFittingMod.max_palette
                     # add color to pal
                     BoxFittingMod.good_color[BoxFittingMod.num_pal] = pixel_value
                     BoxFittingMod.num_pal += 1

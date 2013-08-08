@@ -23,16 +23,20 @@ class DomSketch < Processing::App
         frame_rate 30
         rect_mode RADIUS
 
-        @balls = []
-        15.times { @balls << Ball.new(10, PVector.new(2.15, -1.35), *empty_space(15)) }
-        3.times { @balls << ColoredBall.new(40, PVector.new(-1.65, 0.42), *empty_space(45)) }
-        1.times { @balls << Ball.new(55, PVector.new(3.15, -1.35), *empty_space(60)) }
+        create_balls
 
         @frame_time = nil
         @frame_count = 0
     end
 
-
+    def create_balls
+        @balls = []
+        15.times { @balls << Ball.new(10, PVector.new(2.15, -1.35), *empty_space(15)) }
+        3.times { @balls << ColoredBall.new(40, PVector.new(-1.65, 0.42), *empty_space(45)) }
+        1.times { @balls << Ball.new(55, PVector.new(3.15, -1.35), *empty_space(60)) }
+    end
+    private :create_balls
+    
     def draw
         t = Time.now
         fps = 1.0 / (t - @frame_time) if @frame_time
