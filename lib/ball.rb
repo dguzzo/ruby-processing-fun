@@ -1,10 +1,8 @@
 class Ball
-    attr_accessor :x, :y, :r, :m, :vec, :ball_fill, :num_collisions, :rainbow_mode
+    attr_accessor :x, :y, :r, :m, :vec, :ball_fill, :num_collisions
 
     @@MIN_FILL = 90
     @@INCREMENT_FILL_VAL = 5
-    @@RAINBOW_THRESHOLD = 5 #determines how many collisions are needed for a ball to enter rainbow mode
-    @@COLORS_USED = []
     @@GRAYS_USED = []
     BRIGHTNESS_THRESHOLD_LOW = 200
 
@@ -14,11 +12,6 @@ class Ball
         @vec = vec
         @ball_fill = rand(255)
         @num_collisions = 0
-        @rainbow_mode = false
-    end
-
-    def self.colors_used
-        @@COLORS_USED.length
     end
 
     def self.grays_used
@@ -45,9 +38,6 @@ class Ball
     def collision_side_effects
         # @num_collisions += 1
         @num_collisions = @num_collisions.next # just having fun with methods for learning purposes
-        if @num_collisions > @@RAINBOW_THRESHOLD
-            @rainbow_mode = true
-        end
         increment_fill
     end
 
@@ -55,14 +45,8 @@ class Ball
     def increment_fill
         begin
             # increment the fill value. reset value to a certain minimum if it goes over the max gray value.
-            if @rainbow_mode
-                new_color = [rand(255),rand(255),rand(255)]
-                @ball_fill = new_color
-                @@COLORS_USED << new_color unless @@COLORS_USED.include?(new_color)
-            else
-                @ball_fill = ((@ball_fill += @@INCREMENT_FILL_VAL) > 255 ) ? @@MIN_FILL : @ball_fill += @@INCREMENT_FILL_VAL
-                @@GRAYS_USED << @ball_fill unless @@GRAYS_USED.include?(@ball_fill)
-            end
+            @ball_fill = ((@ball_fill += @@INCREMENT_FILL_VAL) > 255 ) ? @@MIN_FILL : @ball_fill += @@INCREMENT_FILL_VAL
+            @@GRAYS_USED << @ball_fill unless @@GRAYS_USED.include?(@ball_fill)
         rescue => e
             puts "error in increment_fill: #{e.message}"
         end

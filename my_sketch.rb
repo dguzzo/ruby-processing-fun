@@ -4,6 +4,7 @@
 require 'pp'
 require 'lib/helpers'
 require 'lib/ball'
+require 'lib/colored_ball'
 
 class DomSketch < Processing::App
     attr_accessor :canvas_background
@@ -24,7 +25,7 @@ class DomSketch < Processing::App
 
         @balls = []
         15.times { @balls << Ball.new(10, PVector.new(2.15, -1.35), *empty_space(15)) }
-        3.times { @balls << Ball.new(40, PVector.new(-1.65, 0.42), *empty_space(45)) }
+        3.times { @balls << ColoredBall.new(40, PVector.new(-1.65, 0.42), *empty_space(45)) }
         1.times { @balls << Ball.new(55, PVector.new(3.15, -1.35), *empty_space(60)) }
 
         @frame_time = nil
