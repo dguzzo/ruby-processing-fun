@@ -22,19 +22,31 @@
 
 # Uses the "bare" style, where a Processing::App sketch is implicitly wrapped
 
+attr_accessor :mouse_click_coords, :drawer
+
 def setup
   size(500, 500)
   frame_rate(10)
+  @drawer = RectDrawer.new
 end
 
 def draw
-  drawer = RectDrawer.new
   drawer.draw_whites
   drawer.draw_blacks
-  drawer.draw_greys('chaotic')
+  drawer.draw_greys('chaotic', 'user')
+end
+
+def mouse_pressed
+  @drawer.mouse_click_coords = {x: mouse_x, y: mouse_y}
 end
 
 class RectDrawer
+  attr_accessor :mouse_click_coords
+  
+  def initialize
+    @mouse_click_coords = {x: nil, y: nil}
+  end
+  
   def draw_whites(style = nil)
     fill(255)
     stroke(0)
@@ -52,21 +64,25 @@ class RectDrawer
     popMatrix()
   end
 
-  def draw_greys(style = nil)
+  def draw_greys(style = nil, control = nil)
     fill(100)
     stroke(0)
-
+    
     pushMatrix()
-    translate(300, 300)
-    draw_rects(style, 30)
+    translate(300, 300) if control != 'user'
+    draw_rects(style, control, 30)
     popMatrix()
   end
-  
+
+  ##########
   private
-  def draw_rects(style, repititions = 10)
+  
+  def draw_rects(style = nil, control = nil, repititions = 10)
     repititions.times do
-      if style == 'chaotic'
+      if style == 'chaotic' && control != 'user'
         rect(balanced_offset, balanced_offset, 50 + balanced_offset , 50 + balanced_offset)
+      elsif control == 'user'
+        rect((@mouse_click_coords[:x] || 0) + balanced_offset, (@mouse_click_coords[:y] || 0) + balanced_offset, 50 + balanced_offset , 50 + balanced_offset)
       else
         offset =  non_negative_offset
         rect(offset, offset, 50 + offset , 50 + offset)
@@ -81,5 +97,4 @@ class RectDrawer
   def non_negative_offset
     random(100)
   end
-  
 end
