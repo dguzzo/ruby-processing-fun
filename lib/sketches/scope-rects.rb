@@ -52,7 +52,7 @@ class RectDrawer
     popMatrix()
   end
 
-  def draw_greys(style)
+  def draw_greys(style = nil)
     fill(100)
     stroke(0)
 
