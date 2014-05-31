@@ -58,13 +58,13 @@ class RectDrawer
 
     pushMatrix()
     translate(300, 300)
-    draw_rects(style)
+    draw_rects(style, 30)
     popMatrix()
   end
   
   private
-  def draw_rects(style)
-    10.times do
+  def draw_rects(style, repititions = 10)
+    repititions.times do
       if style == 'chaotic'
         rect(balanced_offset, balanced_offset, 50 + balanced_offset , 50 + balanced_offset)
       else
