@@ -15,9 +15,11 @@ class BoxFittingMod < Processing::App
     @@max_boxes = 1000
     @@boxes = []
 
-    # unfortunately necessary to do this manually or class variables accessible outside the class itself. if i could easily load active_support via
-    # jruby, then i could use :cattr_accessor and this would define the getters/setters automatically, but I keep running into issues with gem
-    # dependencies. a stack overflow answer said that doing it manually was a workable alternative.
+    # unfortunately necessary to do this manually or class variables accessible outside
+    # the class itself. if i could easily load active_support via jRuby, then i could 
+    # use :cattr_accessor and this would define the getters/setters automatically, 
+    # but I keep running into issues with gem dependencies. a stack overflow answer said 
+    # that doing it manually was a workable alternative.
     
     def self.num_pal
         @@num_pal
@@ -47,7 +49,6 @@ class BoxFittingMod < Processing::App
         rectMode(CENTER)
         
         p color_from_image("images/warm_red.png")
-        # p color_from_image("images/green.png")
         # take_color("images/warm_red.png")
         
         background(255)

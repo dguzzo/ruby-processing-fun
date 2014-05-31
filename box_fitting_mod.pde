@@ -1,4 +1,4 @@
-// mod by D.Guzzo -- http://www.telecommutetojuryduty.com/
+// mod by D.Guzzo -- dguzzo at gmail dot com
 
 // Box Fitting
 // j.tarbell   January, 2004
